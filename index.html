@@ -69,7 +69,6 @@
             transform: scale(1.05);
         }
 
-        /* تنسيق الشعار المعدل لضمان الشفافية */
         .logo-container {
             width: 150px;
             margin: 0 auto;
@@ -289,7 +288,7 @@
             
             <div style="padding:15px; text-align:center; background:var(--primary-color); border-top: 1px solid var(--border-color); line-height: 1.5;">
                 <div style="font-size:0.85em; font-weight: bold; color: var(--header-text);">برمجة وتطوير Mathtme © 2026</div>
-                <div style="font-size:0.75em; font-weight: bold; color: var(--light-text); margin-top:5px;">بإشراف: نفال النفيعي</div>
+                <div style="font-size:0.75em; font-weight: bold; color: var(--light-text); margin-top:5px;"> نفال النفيعي - عبدالمجيد الرشيدي</div>
             </div>
         </aside>
 
@@ -310,14 +309,6 @@
     <script>
         const CONFIG = { username: 'Mathtme', repo: 'Mathtme', branch: 'main' };
         
-        const folderMap = {
-            'أول ابتدائي': 'primary1', 'ثاني ابتدائي': 'primary2', 'ثالث ابتدائي': 'primary3',
-            'رابع ابتدائي': 'primary4', 'خامس ابتدائي': 'primary5', 'سادس ابتدائي': 'primary6',
-            'أول متوسط': 'intermediate1', 'ثاني متوسط': 'intermediate2', 'ثالث متوسط': 'intermediate3',
-            'أول ثانوي': 'secondary1', 'ثاني ثانوي': 'secondary2', 'ثالث ثانوي': 'secondary3'
-        };
-        const reverseFolderMap = Object.entries(folderMap).reduce((acc, [ar, en]) => { acc[en] = ar; return acc; }, {});
-
         let allFiles = [], favorites = JSON.parse(localStorage.getItem('file_fav_paths')) || [];
         let currentFolder = 'none';
 
@@ -365,15 +356,14 @@
                 if (data.tree) {
                     allFiles = data.tree.filter(i => i.type === 'blob' && i.path.includes('/') && !i.path.endsWith('.keep')).map(i => {
                         const pathParts = i.path.split('/');
-                        // تحويل اسم المجلد لأحرف صغيرة وإزالة المسافات لضمان مطابقته للقائمة
-                        const folderEn = pathParts[0].toLowerCase().trim(); 
+                        // الاعتماد على الاسم العربي للمجلد مباشرة
+                        const folderName = pathParts[0].trim(); 
                         const name = pathParts.pop(); 
                         return {
                             name: name,
                             path: i.path,
                             sha: i.sha,
-                            folderEn: folderEn,
-                            folderAr: reverseFolderMap[folderEn] || folderEn,
+                            folderAr: folderName, 
                             download_url: `https://raw.githubusercontent.com/${CONFIG.username}/${CONFIG.repo}/${CONFIG.branch}/${encodePath(i.path)}`
                         };
                     }).reverse();
