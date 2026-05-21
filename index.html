@@ -43,43 +43,49 @@
         }
 
         .sidebar-header { 
-            background-color: var(--primary-color); padding: 35px 20px; color: var(--header-text); 
+            background-color: var(--primary-color); padding: 35px 20px 20px; color: var(--header-text); 
             border-bottom: 3px solid var(--accent-color);
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            position: relative; 
         }
 
-        .controls-group {
-            display: flex; align-items: center; gap: 15px; padding: 8px 15px;
-            border: 1px solid var(--border-color); border-radius: 12px;
-            background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(5px);
-            width: fit-content; margin: 0 auto; position: relative; z-index: 2;
+        .theme-toggle-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 1.1em;
+            color: var(--header-text);
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid var(--border-color);
+            padding: 8px 10px;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+            z-index: 10;
         }
-        .control-icon-btn { cursor: pointer; transition: 0.3s; font-size: 1.1em; color: var(--header-text); }
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.7);
+            transform: scale(1.05);
+        }
 
-        /* تنسيق مساحة الشعار */
         .logo-container {
-            width: 90px;
-            height: 90px;
-            margin: -5px auto 10px;
-            background-color: var(--panel-bg);
-            border: 3px solid var(--accent-color);
-            border-radius: 50%;
+            width: 150px;
+            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(197, 168, 128, 0.2);
             transition: 0.3s;
             position: relative;
             z-index: 2;
         }
         .logo-container:hover {
-            transform: scale(1.05);
+            transform: scale(1.03);
         }
         .logo-container img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
+            object-fit: contain;
         }
 
         .admin-controls { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
@@ -125,7 +131,7 @@
         .file-row:hover { background-color: var(--hover-bg); }
         .file-row.active { background-color: var(--hover-bg); border-right: 5px solid var(--accent-color); }
         
-        .file-info { display: flex; flex-direction: column; padding: 15px 15px 15px 110px; }
+        .file-info { display: flex; flex-direction: column; padding: 15px 15px 15px 50px; }
         .file-info .name { font-weight: 700; font-size: 0.92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .row-actions { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); display: flex; gap: 12px; align-items: center; }
@@ -166,6 +172,14 @@
         .audio-player-container, .unsupported-container {
             text-align: center; background: var(--panel-bg); padding: 40px; border-radius: 25px; 
             box-shadow: var(--shadow-elevation); width: 80%; max-width: 400px; border: 1px solid var(--border-color);
+        }
+
+        /* تنسيق قراءة النصوص */
+        .text-viewer {
+            width: 100%; height: 100%; overflow: auto; background: var(--panel-bg); 
+            padding: 30px; box-sizing: border-box; text-align: right; direction: rtl; 
+            font-family: 'Almarai', sans-serif; white-space: pre-wrap; color: var(--text-color); line-height: 1.8;
+            font-size: 1.05em;
         }
 
         @media (max-width: 768px) { 
@@ -218,66 +232,15 @@
         </div>
     </div>
 
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('deleteModal')">×</span>
-            <i class="fa-solid fa-circle-exclamation fa-4x" style="color:#ef4444; margin-bottom:15px;"></i>
-            <h3>تأكيد الحذف؟</h3>
-            <p id="deleteMsg" style="font-weight:bold;"></p>
-            <div style="display:flex; gap:10px;">
-                <button class="upload-btn" style="display:block; background:#ef4444; width:100%; padding:15px; border-radius:15px; color:white; border:none; font-weight:bold; cursor:pointer;" onclick="executeDelete()">حذف نهائي</button>
-                <button class="side-input" onclick="closeModal('deleteModal')">تراجع</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="renameModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('renameModal')">×</span>
-            <div style="font-size: 3em; color: var(--accent-color); margin-bottom: 15px;"><i class="fa-solid fa-pen-to-square"></i></div>
-            <h3>إعادة تسمية</h3>
-            <input type="text" id="newNameInput" class="side-input" placeholder="اسم الملف مع الامتداد (مثال: نموذج.pdf)">
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="side-input" onclick="executeRename()" style="background: var(--button-color); color:white; font-weight:bold;">حفظ</button>
-                <button class="side-input" onclick="closeModal('renameModal')">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="moveModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('moveModal')">×</span>
-            <h3>نقل إلى مجلد</h3>
-            <select id="moveFolderSelect" class="side-input">
-                <option value="أول ابتدائي">أول ابتدائي</option>
-                <option value="ثاني ابتدائي">ثاني ابتدائي</option>
-                <option value="ثالث ابتدائي">ثالث ابتدائي</option>
-                <option value="رابع ابتدائي">رابع ابتدائي</option>
-                <option value="خامس ابتدائي">خامس ابتدائي</option>
-                <option value="سادس ابتدائي">سادس ابتدائي</option>
-                <option value="أول متوسط">أول متوسط</option>
-                <option value="ثاني متوسط">ثاني متوسط</option>
-                <option value="ثالث متوسط">ثالث متوسط</option>
-                <option value="أول ثانوي">أول ثانوي</option>
-                <option value="ثاني ثانوي">ثاني ثانوي</option>
-                <option value="ثالث ثانوي">ثالث ثانوي</option>
-            </select>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="side-input" onclick="executeMove()" style="background: var(--button-color); color:white; font-weight:bold;">نقل</button>
-                <button class="side-input" onclick="closeModal('moveModal')">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
     <div class="container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="controls-group">
-                    <i id="theme-icon" class="fa-solid fa-moon control-icon-btn" onclick="toggleTheme()"></i>
+                <div class="theme-toggle-btn" onclick="toggleTheme()" title="تبديل الوضع الليلي">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
                 </div>
                 
                 <div class="logo-container">
-                    <img src="https://raw.githubusercontent.com/Mathtme/Students/main/logo11.png" alt="شعار Mathtme" onerror="this.src='https://via.placeholder.com/90/c5a880/ffffff?text=Mathtme'">
+                    <img src="https://raw.githubusercontent.com/Mathtme/Mathtme/main/logo11.png" alt="شعار Mathtme" onerror="this.src='https://via.placeholder.com/150/c5a880/ffffff?text=Mathtme'">
                 </div>
 
                 <h2 style="text-align:center; margin-top:5px; font-size:1.15em; font-weight: 800; color: var(--header-text); position: relative; z-index: 2; line-height: 1.7;">
@@ -317,7 +280,11 @@
             </div>
 
             <div class="file-list-container"><div id="file-list"></div></div>
-            <div style="padding:15px; text-align:center; font-size:0.8em; background:var(--primary-color); color: var(--header-text); font-weight: bold; border-top: 1px solid var(--border-color);">برمجة وتطوير Mathtme © 2026</div>
+            
+            <div style="padding:15px; text-align:center; background:var(--primary-color); border-top: 1px solid var(--border-color); line-height: 1.5;">
+                <div style="font-size:0.85em; font-weight: bold; color: var(--header-text);">برمجة وتطوير Mathtme © 2026</div>
+                <div style="font-size:0.75em; font-weight: bold; color: var(--light-text); margin-top:5px;">بإشراف: نفال النفيعي- عبدالمجيد الرشيدي</div>
+            </div>
         </aside>
 
         <main class="main-content">
@@ -335,7 +302,7 @@
     </div>
 
     <script>
-        const CONFIG = { username: 'Mathtme', repo: 'Students', branch: 'main' };
+        const CONFIG = { username: 'Mathtme', repo: 'Mathtme', branch: 'main' };
         
         const folderMap = {
             'أول ابتدائي': 'primary1', 'ثاني ابتدائي': 'primary2', 'ثالث ابتدائي': 'primary3',
@@ -346,7 +313,7 @@
         const reverseFolderMap = Object.entries(folderMap).reduce((acc, [ar, en]) => { acc[en] = ar; return acc; }, {});
 
         let allFiles = [], favorites = JSON.parse(localStorage.getItem('file_fav_paths')) || [];
-        let currentFolder = 'none', deleteTarget = null, renameTarget = null, moveTarget = null;
+        let currentFolder = 'none';
 
         function encodePath(p) { return p.split('/').map(encodeURIComponent).join('/'); }
 
@@ -380,7 +347,8 @@
             const list = document.getElementById("file-list");
             list.innerHTML = '<center style="padding:20px; font-size:0.9em; opacity:0.6;"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحديث الملفات...</center>';
             try {
-                const res = await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/git/trees/${CONFIG.branch}?recursive=1`);
+                // إضافة متغير t= للرابط لمنع مشكلة التخزين المؤقت (Cache) وجلب أحدث الملفات دائماً
+                const res = await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/git/trees/${CONFIG.branch}?recursive=1&t=${new Date().getTime()}`, { cache: "no-store" });
                 const data = await res.json();
                 if (data.tree) {
                     allFiles = data.tree.filter(i => i.type === 'blob' && i.path.includes('/') && !i.path.endsWith('.keep')).map(i => {
@@ -448,9 +416,6 @@
                     <div class="file-info"><span class="name">${isLink ? '🔗 ' : ''}${cleanFileName(file.name)}</span></div>
                     <div class="row-actions">
                         <i class="fa-solid fa-star" style="color:${isStarred ? 'var(--accent-color)' : '#cbd5e1'}" onclick="toggleStar(event, '${file.path}')"></i>
-                        <i class="fa-solid fa-folder-plus" style="color:var(--primary-color)" onclick="openMoveModal(event, ${JSON.stringify(file).replace(/"/g, '&quot;')})"></i>
-                        <i class="fa-solid fa-pen-to-square" style="color:var(--primary-color)" onclick="openRenameModal(event, ${JSON.stringify(file).replace(/"/g, '&quot;')})"></i>
-                        <i class="fa-solid fa-trash" style="color:#ef4444;" onclick="openDeleteModal(event, '${file.name}', '${file.path}', '${file.sha}')"></i>
                     </div>`;
                 div.onclick = (e) => {
                     document.querySelectorAll('.file-row').forEach(r => r.classList.remove('active'));
@@ -477,13 +442,23 @@
             const viewer = document.getElementById("viewer");
             const ext = name.split('.').pop().toLowerCase();
             
-            const docExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'rtf', 'csv'];
+            const docExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'rtf'];
+            const textExts = ['txt', 'csv', 'md'];
             const imgExts = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'];
             const vidExts = ['mp4', 'webm', 'ogg', 'mov', 'avi'];
             const audExts = ['mp3', 'wav', 'm4a', 'aac'];
 
             if (docExts.includes(ext)) {
                 viewer.innerHTML = `<iframe src="https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true"></iframe>`;
+            } else if (textExts.includes(ext)) {
+                viewer.innerHTML = `<center style="padding:40px;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--accent-color);"></i></center>`;
+                try {
+                    const txtRes = await fetch(url);
+                    const textContent = await txtRes.text();
+                    viewer.innerHTML = `<div class="text-viewer">${textContent}</div>`;
+                } catch(e) {
+                    viewer.innerHTML = `<iframe src="https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true"></iframe>`;
+                }
             } else if (imgExts.includes(ext)) {
                 viewer.innerHTML = `<img src="${url}" style="object-fit:contain; max-width:100%; max-height:100%;">`;
             } else if (vidExts.includes(ext)) {
@@ -518,90 +493,6 @@
             else favorites.push(path);
             localStorage.setItem('file_fav_paths', JSON.stringify(favorites));
             handleSearchOrFilter();
-        }
-
-        function openDeleteModal(e, name, path, sha) { 
-            e.stopPropagation(); 
-            deleteTarget = { name, path, sha }; 
-            document.getElementById('deleteMsg').innerText = name; 
-            openModal('deleteModal'); 
-        }
-
-        async function executeDelete() {
-            const res = await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/${encodePath(deleteTarget.path)}`, {
-                method: 'DELETE',
-                body: JSON.stringify({ message: `Delete ${deleteTarget.name}`, sha: deleteTarget.sha, branch: CONFIG.branch })
-            });
-            if (res.ok) { closeModal('deleteModal'); loadFromGithub(); resetViewer(); }
-        }
-
-        function openRenameModal(e, f) { 
-            e.stopPropagation(); 
-            renameTarget = f; 
-            document.getElementById('newNameInput').value = f.name; 
-            openModal('renameModal'); 
-        }
-
-        async function executeRename() {
-            const newN = document.getElementById('newNameInput').value.trim();
-            if (!newN || newN === renameTarget.name) return closeModal('renameModal');
-            
-            const newPath = `${renameTarget.folderEn}/${newN}`;
-            
-            const fRes = await fetch(renameTarget.download_url);
-            const blob = await fRes.blob();
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = async () => {
-                const content = reader.result.split(',')[1];
-                const putRes = await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/${encodePath(newPath)}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ message: `Rename to ${newN}`, content, branch: CONFIG.branch })
-                });
-                if (putRes.ok) {
-                    await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/${encodePath(renameTarget.path)}`, {
-                        method: 'DELETE',
-                        body: JSON.stringify({ message: `Cleanup old file`, sha: renameTarget.sha, branch: CONFIG.branch })
-                    });
-                    closeModal('renameModal'); loadFromGithub(); resetViewer();
-                }
-            };
-        }
-
-        function openMoveModal(e, f) { 
-            e.stopPropagation(); 
-            moveTarget = f; 
-            document.getElementById('moveFolderSelect').value = f.folderAr;
-            openModal('moveModal'); 
-        }
-
-        async function executeMove() {
-            const targetFolderAr = document.getElementById('moveFolderSelect').value;
-            const targetFolderEn = folderMap[targetFolderAr];
-            const newPath = `${targetFolderEn}/${moveTarget.name}`;
-            
-            if (moveTarget.path === newPath) {
-                closeModal('moveModal'); return;
-            }
-
-            const fRes = await fetch(moveTarget.download_url);
-            const blob = await fRes.blob();
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = async () => {
-                const content = reader.result.split(',')[1];
-                const putRes = await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/${encodePath(newPath)}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ message: `Move to ${targetFolderAr}`, content, branch: CONFIG.branch })
-                });
-                if (putRes.ok) {
-                    await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/${encodePath(moveTarget.path)}`, {
-                        method: 'DELETE',
-                        body: JSON.stringify({ message: `Cleanup old file after move`, sha: moveTarget.sha, branch: CONFIG.branch })
-                    });
-                    closeModal('moveModal'); loadFromGithub(); resetViewer();
-                }
-            };
         }
 
         loadFromGithub();
