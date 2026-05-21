@@ -69,6 +69,7 @@
             transform: scale(1.05);
         }
 
+        /* تنسيق الشعار المعدل لضمان الشفافية */
         .logo-container {
             width: 150px;
             margin: 0 auto;
@@ -78,6 +79,11 @@
             transition: 0.3s;
             position: relative;
             z-index: 2;
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
         }
         .logo-container:hover {
             transform: scale(1.03);
@@ -86,6 +92,7 @@
             width: 100%;
             height: auto;
             object-fit: contain;
+            background: transparent !important;
         }
 
         .admin-controls { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
@@ -174,7 +181,6 @@
             box-shadow: var(--shadow-elevation); width: 80%; max-width: 400px; border: 1px solid var(--border-color);
         }
 
-        /* تنسيق قراءة النصوص */
         .text-viewer {
             width: 100%; height: 100%; overflow: auto; background: var(--panel-bg); 
             padding: 30px; box-sizing: border-box; text-align: right; direction: rtl; 
@@ -283,7 +289,7 @@
             
             <div style="padding:15px; text-align:center; background:var(--primary-color); border-top: 1px solid var(--border-color); line-height: 1.5;">
                 <div style="font-size:0.85em; font-weight: bold; color: var(--header-text);">برمجة وتطوير Mathtme © 2026</div>
-                <div style="font-size:0.75em; font-weight: bold; color: var(--light-text); margin-top:5px;">بإشراف: نفال النفيعي- عبدالمجيد الرشيدي</div>
+                <div style="font-size:0.75em; font-weight: bold; color: var(--light-text); margin-top:5px;">بإشراف: نفال النفيعي</div>
             </div>
         </aside>
 
@@ -347,13 +353,20 @@
             const list = document.getElementById("file-list");
             list.innerHTML = '<center style="padding:20px; font-size:0.9em; opacity:0.6;"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحديث الملفات...</center>';
             try {
-                // إضافة متغير t= للرابط لمنع مشكلة التخزين المؤقت (Cache) وجلب أحدث الملفات دائماً
-                const res = await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/git/trees/${CONFIG.branch}?recursive=1&t=${new Date().getTime()}`, { cache: "no-store" });
+                // 1. جلب المعرف الدقيق لآخر تحديث في المستودع لكسر كاش GitHub نهائياً
+                const refRes = await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/git/refs/heads/${CONFIG.branch}?t=${new Date().getTime()}`);
+                const refData = await refRes.json();
+                const latestSha = refData.object ? refData.object.sha : CONFIG.branch;
+
+                // 2. جلب شجرة الملفات باستخدام المعرف الجديد
+                const res = await fetch(`https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/git/trees/${latestSha}?recursive=1`);
                 const data = await res.json();
+                
                 if (data.tree) {
                     allFiles = data.tree.filter(i => i.type === 'blob' && i.path.includes('/') && !i.path.endsWith('.keep')).map(i => {
                         const pathParts = i.path.split('/');
-                        const folderEn = pathParts[0];
+                        // تحويل اسم المجلد لأحرف صغيرة وإزالة المسافات لضمان مطابقته للقائمة
+                        const folderEn = pathParts[0].toLowerCase().trim(); 
                         const name = pathParts.pop(); 
                         return {
                             name: name,
@@ -366,7 +379,10 @@
                     }).reverse();
                     handleSearchOrFilter();
                 }
-            } catch (e) { list.innerHTML = '<center>خطأ في الاتصال بخوادم GitHub</center>'; }
+            } catch (e) { 
+                list.innerHTML = '<center>خطأ في الاتصال بخوادم GitHub</center>'; 
+                console.error(e);
+            }
         }
 
         function filterByFolder(folder) { 
